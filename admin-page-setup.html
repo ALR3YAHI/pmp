@@ -1,0 +1,696 @@
+<!-- admin.html - New file for admin functionality -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMP Quiz Admin Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        /* Copy all the styles from your original file */
+        :root {
+            --primary: #1976d2;
+            --primary-dark: #145ea8;
+            --secondary: #f5f5f5;
+            --text: #333;
+            --success: #4caf50;
+            --error: #f44336;
+            --neutral: #9e9e9e;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: var(--neutral);
+            font-size: 1.1rem;
+        }
+        
+        .admin-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-login-screen, .admin-dashboard {
+            display: none;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            margin: 0.5rem 0;
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        button.secondary {
+            background-color: #f5f5f5;
+            color: var(--text);
+            border: 1px solid #e0e0e0;
+        }
+        
+        button.secondary:hover {
+            background-color: #ebebeb;
+        }
+        
+        /* Admin dashboard styles */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .student-row {
+            cursor: pointer;
+        }
+
+        .student-row:hover {
+            background-color: rgba(25, 118, 210, 0.05);
+        }
+        
+        .student-details {
+            margin-top: 2rem;
+            display: none;
+        }
+        
+        .student-chart {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .back-btn {
+            margin-bottom: 1rem;
+        }
+        
+        .review-item {
+            background-color: white;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .review-item.correct {
+            border-left: 4px solid var(--success);
+        }
+        
+        .review-item.incorrect {
+            border-left: 4px solid var(--error);
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .review-status {
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .review-status.correct {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+        
+        .review-status.incorrect {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--error);
+        }
+        
+        .explanation {
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .admin-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PMP Quiz Admin Dashboard</h1>
+            <p class="subtitle">View and manage quiz results</p>
+        </div>
+        
+        <div class="admin-container">
+            <!-- Admin Login Screen -->
+            <div class="admin-login-screen active" id="admin-login-screen">
+                <div class="admin-login">
+                    <h2>Admin Login</h2>
+                    <p>Enter your admin credentials to view quiz results</p>
+                    <form id="admin-form">
+                        <div>
+                            <label for="admin-username">Username:</label>
+                            <input type="text" id="admin-username" placeholder="Enter admin username" required>
+                        </div>
+                        <div>
+                            <label for="admin-password">Password:</label>
+                            <input type="password" id="admin-password" placeholder="Enter password" required>
+                        </div>
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                            <button type="submit">Login</button>
+                            <a href="index.html" class="secondary" style="text-decoration: none; display: inline-block; padding: 12px 20px; border-radius: 5px; background-color: #f5f5f5; color: #333; border: 1px solid #e0e0e0; font-size: 16px; font-weight: 600;">Back to Quiz</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Admin Dashboard Screen -->
+            <div class="admin-dashboard" id="admin-dashboard">
+                <div class="admin-header">
+                    <h2>Admin Dashboard</h2>
+                    <button class="export-btn" id="export-excel">
+                        Export to Excel
+                    </button>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Quiz Statistics</h3>
+                        <p>Total Attempts: <strong id="total-attempts">0</strong></p>
+                        <p>Average Score: <strong id="average-score">0%</strong></p>
+                        <p>Highest Score: <strong id="highest-score">0%</strong></p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Most Missed Questions</h3>
+                        <div id="missed-questions"></div>
+                    </div>
+                </div>
+                
+                <div class="stat-card" style="margin-top: 1rem;">
+                    <h3>Student Results</h3>
+                    <table id="student-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Organization</th>
+                                <th>Score</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-results">
+                            <!-- Student results will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="student-details" id="student-details">
+                    <button class="back-btn secondary" id="back-to-students">Back to All Students</button>
+                    <h3>Student Details: <span id="student-name"></span></h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: center;">
+                        <div style="flex: 1; min-width: 300px;">
+                            <p>Email: <strong id="student-email"></strong></p>
+                            <p>Organization: <strong id="student-org"></strong></p>
+                            <p>Score: <strong id="student-score"></strong></p>
+                            <p>Date: <strong id="student-date"></strong></p>
+                        </div>
+                        <div style="flex: 1; min-width: 300px;">
+                            <div class="student-chart">
+                                <canvas id="student-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="question-review" style="margin-top: 2rem;">
+                        <h3>Question Review</h3>
+                        <div id="student-review-container"></div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="index.html" class="secondary" style="text-decoration: none; display: inline-block; padding: 12px 20px; border-radius: 5px; background-color: #f5f5f5; color: #333; border: 1px solid #e0e0e0; font-size: 16px; font-weight: 600;">Back to Quiz</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    // Quiz Data (needed for reference)
+    const quizData = [
+        {
+            id: 1,
+            question: "A contractor responsible for the structural design has been unable to meet key deadlines due to poor coordination with the electrical team. Both teams are working on overlapping sections of the building, causing delays in installation. Which tool would have helped prevent this coordination issue?",
+            options: [
+                "Implement an Interface Complexity Assessment Tool (ICAT) to rank and prioritize critical interfaces between the structural and electrical teams.",
+                "Conduct Monte Carlo Simulation to predict the probability of delays in the coordination between teams.",
+                "Use Lean Integrated Project Delivery (IPD) to streamline workflows and reduce delays.",
+                "Develop an Interface Data Register (IDR) to track and manage key coordination milestones."
+            ],
+            correctAnswers: [0],
+            explanation: "The Interface Complexity Assessment Tool (ICAT) is used to identify and prioritize critical interfaces between teams. By ranking these interfaces, the project manager can ensure coordination between teams that have overlapping tasks, avoiding delays."
+        },
+        // ... include all the other questions from your original file
+        {
+            id: 10,
+            question: "A construction professional is leading the construction of a built environment project. During a phone call with a key stakeholder, the latter requested adding some work to the project. The construction professional informed the stakeholder that this would cost an additional $80,000, to which the stakeholder agreed. However, when the construction professional sent the invoice including the additional work fees, the key stakeholder refused to pay the additional cost claiming that the project had an unacceptable delay which could be even penalized. What should the construction professional have done to avoid this situation?",
+            options: [
+                "Opt for a different communication channel",
+                "Cut the scope to balance the cost of the additional work",
+                "Request a lower price for the additional work",
+                "Request more time to execute the requested work"
+            ],
+            correctAnswers: [0, 3],
+            explanation: "This situation could have been avoided if the construction professional had used formal communication when discussing and approving changes to the contract terms. A phone call is considered informal communication, which means that any decisions made over the phone mainly rely on mutual trust since there is no written record of the discussion or any ensuing decisions. Furthermore, the construction professional had only analyzed the impact of the change on cost and did not thoroughly analyze its impact on scope, time, and resources."
+        }
+    ];
+
+    // Admin credentials
+    const adminCredentials = {
+        username: "admin",
+        password: "pmp2025"
+    };
+
+    // Variables to store student data
+    let studentResults = [];
+
+    // DOM Elements
+    const adminLoginScreen = document.getElementById('admin-login-screen');
+    const adminDashboard = document.getElementById('admin-dashboard');
+    const adminForm = document.getElementById('admin-form');
+    const exportExcelBtn = document.getElementById('export-excel');
+    const backToStudentsBtn = document.getElementById('back-to-students');
+    const studentDetails = document.getElementById('student-details');
+
+    // Event Listeners
+    adminForm.addEventListener('submit', handleAdminLogin);
+    exportExcelBtn.addEventListener('click', exportToExcel);
+    backToStudentsBtn.addEventListener('click', showStudentList);
+
+    // Admin Login function
+    function handleAdminLogin(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('admin-username').value;
+        const password = document.getElementById('admin-password').value;
+        
+        if (username === adminCredentials.username && password === adminCredentials.password) {
+            // Load results from local storage
+            loadResultsFromLocalStorage();
+            
+            // Hide admin login screen
+            adminLoginScreen.classList.remove('active');
+            
+            // Show admin dashboard
+            adminDashboard.classList.add('active');
+            
+            // Update dashboard
+            updateAdminDashboard();
+        } else {
+            alert('Invalid credentials. Please try again.');
+        }
+    }
+
+    // Load results from local storage
+    function loadResultsFromLocalStorage() {
+        const results = localStorage.getItem('pmpQuizResults');
+        
+        if (results) {
+            studentResults = JSON.parse(results);
+        }
+    }
+
+    // Update admin dashboard
+    function updateAdminDashboard() {
+        // Update stats
+        document.getElementById('total-attempts').textContent = studentResults.length;
+        
+        // Calculate average score
+        const totalScore = studentResults.reduce((sum, student) => sum + student.score, 0);
+        const averageScore = studentResults.length > 0 ? (totalScore / studentResults.length * 10).toFixed(1) : 0;
+        document.getElementById('average-score').textContent = `${averageScore}%`;
+        
+        // Calculate highest score
+        const highestScore = studentResults.length > 0 ? Math.max(...studentResults.map(student => student.score)) * 10 : 0;
+        document.getElementById('highest-score').textContent = `${highestScore}%`;
+        
+        // Calculate most missed questions
+        const missedQuestions = calculateMostMissedQuestions();
+        updateMissedQuestions(missedQuestions);
+        
+        // Update student results table
+        updateStudentTable();
+    }
+
+    // Calculate most missed questions
+    function calculateMostMissedQuestions() {
+        const missedCounts = Array(quizData.length).fill(0);
+        
+        studentResults.forEach(student => {
+            student.answers.forEach((answer, index) => {
+                const correctAnswers = quizData[index].correctAnswers;
+                
+                // Check if incorrect
+                const isCorrect = 
+                    answer.length === correctAnswers.length && 
+                    correctAnswers.every(value => answer.includes(value)) &&
+                    answer.every(value => correctAnswers.includes(value));
+                
+                if (!isCorrect) {
+                    missedCounts[index]++;
+                }
+            });
+        });
+        
+        // Sort by most missed
+        const sortedIndices = [...Array(quizData.length).keys()]
+            .sort((a, b) => missedCounts[b] - missedCounts[a]);
+        
+        // Return top 3
+        return sortedIndices.slice(0, 3).map(index => ({
+            questionIndex: index,
+            missedCount: missedCounts[index]
+        }));
+    }
+
+    // Update missed questions display
+    function updateMissedQuestions(missedQuestions) {
+        const missedContainer = document.getElementById('missed-questions');
+        missedContainer.innerHTML = '';
+        
+        if (studentResults.length === 0) {
+            missedContainer.innerHTML = '<p>No data available yet.</p>';
+            return;
+        }
+        
+        missedQuestions.forEach(item => {
+            const { questionIndex, missedCount } = item;
+            const question = quizData[questionIndex];
+            
+            const percentage = (missedCount / studentResults.length * 100).toFixed(1);
+            
+            const div = document.createElement('div');
+            div.style.margin = '0.8rem 0';
+            div.innerHTML = `
+                <p><strong>Q${questionIndex + 1}:</strong> ${question.question.substring(0, 70)}...</p>
+                <p>Missed by ${missedCount} students (${percentage}%)</p>
+            `;
+            
+            missedContainer.appendChild(div);
+        });
+    }
+
+    // Update student table
+    function updateStudentTable() {
+        const tbody = document.getElementById('student-results');
+        tbody.innerHTML = '';
+        
+        studentResults.forEach((student, index) => {
+            const tr = document.createElement('tr');
+            tr.className = 'student-row';
+            tr.dataset.index = index;
+            
+            tr.innerHTML = `
+                <td>${student.name}</td>
+                <td>${student.email}</td>
+                <td>${student.organization || 'N/A'}</td>
+                <td>${student.score} / ${quizData.length}</td>
+                <td>${student.date}</td>
+            `;
+            
+            tr.addEventListener('click', () => {
+                showStudentDetails(index);
+            });
+            
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Show student details
+    function showStudentDetails(index) {
+        const student = studentResults[index];
+        
+        // Hide student list
+        document.getElementById('student-table').style.display = 'none';
+        
+        // Show student details
+        studentDetails.style.display = 'block';
+        
+        // Update student info
+        document.getElementById('student-name').textContent = student.name;
+        document.getElementById('student-email').textContent = student.email;
+        document.getElementById('student-org').textContent = student.organization || 'N/A';
+        document.getElementById('student-score').textContent = `${student.score} / ${quizData.length}`;
+        document.getElementById('student-date').textContent = student.date;
+        
+        // Generate chart
+        generateStudentChart(student);
+        
+        // Generate review
+        generateStudentReview(student);
+    }
+
+    // Show student list
+    function showStudentList() {
+        // Show student list
+        document.getElementById('student-table').style.display = 'table';
+        
+        // Hide student details
+        studentDetails.style.display = 'none';
+    }
+
+    // Generate student chart
+    function generateStudentChart(student) {
+        const ctx = document.getElementById('student-chart').getContext('2d');
+        
+        // Destroy existing chart if it exists
+        if (window.studentChart) {
+            window.studentChart.destroy();
+        }
+        
+        window.studentChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Correct', 'Incorrect'],
+                datasets: [{
+                    data: [student.score, quizData.length - student.score],
+                    backgroundColor: ['#4caf50', '#f44336']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    // Generate student review
+    function generateStudentReview(student) {
+        const reviewContainer = document.getElementById('student-review-container');
+        reviewContainer.innerHTML = '';
+        
+        quizData.forEach((question, index) => {
+            const userAnswer = student.answers[index];
+            const correctAnswers = question.correctAnswers;
+            
+            // Check if correct
+            const isCorrect = 
+                userAnswer.length === correctAnswers.length && 
+                correctAnswers.every(value => userAnswer.includes(value)) &&
+                userAnswer.every(value => correctAnswers.includes(value));
+            
+            // Create review item
+            const reviewItem = document.createElement('div');
+            reviewItem.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}`;
+            
+            let html = `
+                <div class="review-header">
+                    <div>Question ${index + 1}</div>
+                    <div class="review-status ${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? 'Correct' : 'Incorrect'}</div>
+                </div>
+                <div class="question-text">${question.question}</div>
+                <div class="options">
+            `;
+            
+            question.options.forEach((option, optIndex) => {
+                const isUserSelected = userAnswer.includes(optIndex);
+                const isCorrectOption = correctAnswers.includes(optIndex);
+                
+                let optionClass = '';
+                
+                if (isUserSelected && isCorrectOption) {
+                    optionClass = 'correct';
+                } else if (isUserSelected && !isCorrectOption) {
+                    optionClass = 'incorrect';
+                } else if (!isUserSelected && isCorrectOption) {
+                    optionClass = 'missed';
+                }
+                
+                html += `
+                    <div class="option ${optionClass}">
+                        <div class="option-letter">${String.fromCharCode(65 + optIndex)}</div>
+                        <div>${option}</div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                </div>
+                <div class="explanation">${question.explanation}</div>
+            `;
+            
+            reviewItem.innerHTML = html;
+            reviewContainer.appendChild(reviewItem);
+        });
+    }
+
+    // Export to Excel
+    function exportToExcel() {
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Create data array
+        const data = [
+            ['Name', 'Email', 'Organization', 'Score', 'Date']
+        ];
+        
+        // Add student data
+        studentResults.forEach(student => {
+            data.push([
+                student.name,
+                student.email,
+                student.organization || 'N/A',
+                `${student.score} / ${quizData.length}`,
+                student.date
+            ]);
+        });
+        
+        // Create worksheet
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Quiz Results');
+        
+        // Save file
+        XLSX.writeFile(wb, 'pmp_quiz_results.xlsx');
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        // Check if coming from successful login (URL parameter)
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoLogin = urlParams.get('autologin');
+        
+        if (autoLogin === 'true') {
+            // Load results and show dashboard directly
+            loadResultsFromLocalStorage();
+            adminLoginScreen.classList.remove('active');
+            adminDashboard.classList.add('active');
+            updateAdminDashboard();
+        }
+    });
+    </script>
+</body>
+</html>

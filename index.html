@@ -1,1565 +1,1147 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMP Practice Quiz</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <title>Num Num Friends </title>
     <style>
-        :root {
-            --primary: #1976d2;
-            --primary-dark: #145ea8;
-            --secondary: #f5f5f5;
-            --text: #333;
-            --success: #4caf50;
-            --error: #f44336;
-            --neutral: #9e9e9e;
-        }
-        
+        /* Global Styles */
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
         }
         
         body {
-            background-color: #f9f9f9;
-            color: var(--text);
-            line-height: 1.6;
+            background-color: #ffe6f2;
+            background-image: radial-gradient(#ffb6c1 2px, transparent 2px);
+            background-size: 40px 40px;
+            overflow-x: hidden;
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 20px;
         }
         
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        h1 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-        
-        .subtitle {
-            color: var(--neutral);
-            font-size: 1.1rem;
-        }
-        
-        .quiz-container {
-            background-color: white;
-            border-radius: 10px;
+        /* Header Styles */
+        header {
+            background-color: #ff9fcb;
+            padding: 15px 0;
+            border-bottom: 5px dashed #fff;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            margin-bottom: 2rem;
+            position: relative;
         }
         
-        .welcome-screen, .registration-screen, .quiz-screen, .results-screen, .admin-screen {
-            display: none;
-        }
-        
-        .active {
-            display: block;
-        }
-        
-        .question {
-            margin-bottom: 2rem;
-        }
-        
-        .question-text {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-        
-        .scenario {
-            background-color: #f5f7fa;
-            padding: 1rem;
-            border-left: 4px solid var(--primary);
-            margin-bottom: 1rem;
-            border-radius: 4px;
-        }
-        
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-        
-        .option {
-            display: flex;
-            align-items: flex-start;
-            padding: 0.8rem;
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .option:hover {
-            background-color: #f5f7fa;
-        }
-        
-        .option.selected {
-            background-color: rgba(25, 118, 210, 0.1);
-            border-color: var(--primary);
-        }
-        
-        .option-letter {
-            font-weight: bold;
-            margin-right: 12px;
-            color: var(--primary);
-        }
-        
-        input[type="text"], input[type="email"] {
-            width: 100%;
-            padding: 12px 15px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background-color 0.2s;
-            margin: 0.5rem 0;
-        }
-        
-        button:hover {
-            background-color: var(--primary-dark);
-        }
-        
-        button.secondary {
-            background-color: #f5f5f5;
-            color: var(--text);
-            border: 1px solid #e0e0e0;
-        }
-        
-        button.secondary:hover {
-            background-color: #ebebeb;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-        }
-        
-        .progress-container {
-            margin-bottom: 2rem;
-            width: 100%;
-            background-color: #f5f5f5;
-            border-radius: 5px;
-            height: 10px;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background-color: var(--primary);
-            border-radius: 5px;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        
-        .question-nav {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 2rem;
-        }
-        
-        .question-nav-item {
-            width: 40px;
-            height: 40px;
+        .logo {
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #f5f5f5;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s;
         }
         
-        .question-nav-item:hover {
-            background-color: #e0e0e0;
-        }
-        
-        .question-nav-item.active {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        .question-nav-item.answered {
-            background-color: rgba(25, 118, 210, 0.3);
-        }
-        
-        .results-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .results-score {
+        .logo h1 {
+            color: #7e3f8c;
             font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--primary);
+            text-shadow: 2px 2px 0 #fff;
         }
         
-        .results-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
+        .logo img {
+            width: 60px;
+            margin-right: 10px;
+            animation: bounce 2s infinite;
         }
         
-        .results-summary {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .summary-item {
-            text-align: center;
-            padding: 1rem;
-            border-radius: 10px;
-            background-color: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            min-width: 150px;
-        }
-        
-        .summary-value {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        
-        .chart-container {
-            width: 250px;
-            height: 250px;
-            margin: 0 auto;
-        }
-        
-        .question-review {
-            margin-top: 2rem;
-        }
-        
-        .review-item {
-            background-color: white;
-            border-radius: 5px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        
-        .review-item.correct {
-            border-left: 4px solid var(--success);
-        }
-        
-        .review-item.incorrect {
-            border-left: 4px solid var(--error);
-        }
-        
-        .review-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-        
-        .review-status {
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        
-        .review-status.correct {
-            background-color: rgba(76, 175, 80, 0.1);
-            color: var(--success);
-        }
-        
-        .review-status.incorrect {
-            background-color: rgba(244, 67, 54, 0.1);
-            color: var(--error);
-        }
-        
-        .explanation {
-            background-color: #f9f9f9;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-top: 1rem;
-            font-style: italic;
-        }
-        
-        .admin-login {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1rem;
-        }
-        
-        .stat-card {
-            background-color: white;
-            border-radius: 10px;
-            padding: 1.5rem;
+        /* Navigation */
+        nav {
+            background-color: #ffc0cb;
+            padding: 10px 0;
+            border-radius: 30px;
+            margin: 15px 0;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
         }
         
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
+        nav ul li {
+            margin: 0 15px;
         }
         
-        th {
-            background-color: #f5f5f5;
-            font-weight: 600;
-        }
-        
-        tr:hover {
-            background-color: rgba(0, 0, 0, 0.02);
-        }
-        
-        .student-details {
-            margin-top: 2rem;
-            display: none;
-        }
-        
-        .timer {
+        nav ul li a {
+            color: #7e3f8c;
+            text-decoration: none;
             font-size: 1.2rem;
-            text-align: center;
-            margin-bottom: 1rem;
             font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
         }
         
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .quiz-container {
-                padding: 1.5rem;
-            }
-            
-            .nav-buttons {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .nav-buttons button {
-                width: 100%;
-            }
-            
-            .results-summary {
-                flex-direction: column;
-            }
-            
-            .summary-item {
-                width: 100%;
-            }
+        nav ul li a:hover {
+            background-color: #ffadd2;
+            transform: scale(1.1);
         }
-
-        /* Admin dashboard styles */
-        .admin-header {
+        
+        /* Hero Section */
+        .hero {
+            background-color: #ffd1dc;
+            padding: 30px;
+            border-radius: 40px;
+            margin: 20px 0;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .hero h2 {
+            color: #7e3f8c;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .hero p {
+            color: #5e2f6c;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .hero-button {
+            background-color: #9c6ade;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .hero-button:hover {
+            background-color: #7e3f8c;
+            transform: scale(1.05);
+        }
+        
+        /* Products Section */
+        .products {
+            margin: 40px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            color: #7e3f8c;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 5px;
+            background-color: #ff9fcb;
+            margin: 10px auto;
+            border-radius: 10px;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background-color: #ff9fcb;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: -1;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 4px dotted #ffd1dc;
+        }
+        
+        .product-info {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .product-title {
+            color: #7e3f8c;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+        
+        .product-price {
+            color: #ff6b9d;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .product-button {
+            background-color: #ff9fcb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .product-button:hover {
+            background-color: #ff6b9d;
+            transform: scale(1.05);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #ff9fcb;
+            padding: 30px 0;
+            border-top: 5px dashed #fff;
+            margin-top: 40px;
+        }
+        
+        .footer-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            flex-wrap: wrap;
         }
-
-        .export-btn {
-            display: flex;
+        
+        .footer-info {
+            flex: 1;
+            min-width: 300px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-info h3 {
+            color: #7e3f8c;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .footer-info p {
+            color: #5e2f6c;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .footer-links {
+            flex: 1;
+            min-width: 300px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-links h3 {
+            color: #7e3f8c;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links ul li a {
+            color: #5e2f6c;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links ul li a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+        
+        .copyright {
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+            color: #7e3f8c;
+            font-size: 1rem;
+        }
+        
+        /* Animations */
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+        
+        /* Cart Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
         }
-
-        .student-row {
+        
+        .modal-content {
+            background-color: #fff;
+            border-radius: 30px;
+            width: 80%;
+            max-width: 700px;
+            padding: 30px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: modalOpen 0.5s ease;
+        }
+        
+        @keyframes modalOpen {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            color: #ff6b9d;
             cursor: pointer;
         }
-
-        .student-row:hover {
-            background-color: rgba(25, 118, 210, 0.05);
+        
+        .cart-items {
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
         }
-
-        .student-chart {
+        
+        .cart-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px dotted #ffd1dc;
+        }
+        
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-right: 15px;
+        }
+        
+        .cart-item-details {
+            flex: 1;
+        }
+        
+        .cart-item-title {
+            font-size: 1.2rem;
+            color: #7e3f8c;
+            margin-bottom: 5px;
+        }
+        
+        .cart-item-price {
+            font-size: 1.1rem;
+            color: #ff6b9d;
+            font-weight: bold;
+        }
+        
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+        }
+        
+        .quantity-btn {
+            background-color: #ffd1dc;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quantity-btn:hover {
+            background-color: #ff9fcb;
+        }
+        
+        .quantity-value {
+            margin: 0 10px;
+            font-size: 1.1rem;
+            color: #7e3f8c;
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.3rem;
+            color: #7e3f8c;
+            margin: 20px 0;
+            padding-top: 15px;
+            border-top: 3px solid #ffd1dc;
+        }
+        
+        .checkout-btn {
+            background-color: #9c6ade;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
+            margin-top: 15px;
         }
-
-        .back-btn {
-            margin-bottom: 1rem;
+        
+        .checkout-btn:hover {
+            background-color: #7e3f8c;
+            transform: scale(1.02);
+        }
+        
+        /* Cart Icon */
+        .cart-icon {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #ff6b9d;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        .cart-icon:hover {
+            transform: scale(1.1);
+            background-color: #ff9fcb;
+        }
+        
+        .cart-icon span {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #7e3f8c;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .logo h1 {
+                font-size: 2rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav ul li {
+                margin: 5px 0;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+            
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+        
+        /* Contact Modal Styles */
+        .contact-container {
+            background-color: #ffd1dc;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .contact-title {
+            color: #7e3f8c;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .contact-number {
+            color: #7e3f8c;
+            font-size: 1.8rem;
+            font-weight: bold;
+            background-color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            margin: 10px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .copy-btn {
+            background-color: #9c6ade;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .copy-btn:hover {
+            background-color: #7e3f8c;
+            transform: scale(1.05);
+        }
+        
+        .copy-message {
+            color: #5e2f6c;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        .cart-summary {
+            background-color: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+            max-height: 150px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .summary-title {
+            color: #7e3f8c;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .summary-item {
+            margin-bottom: 5px;
+            color: #5e2f6c;
+            font-size: 1rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>PMP Practice Quiz</h1>
-            <p class="subtitle">Test your knowledge and prepare for the PMP certification exam</p>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <div style="font-size: 2.5rem;">🧸</div>
+                <h1>Num Num Friend's Shop</h1>
+            </div>
         </div>
+    </header>
+    
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#products">Teddies</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
         
-        <div class="quiz-container">
-            <!-- Welcome Screen -->
-            <div class="welcome-screen active">
-                <h2>Welcome to the PMP Practice Quiz</h2>
-                <p>This quiz will test your knowledge on various PMP topics including:</p>
-                <ul style="margin: 1rem 0 1rem 2rem;">
-                    <li>Interface Management</li>
-                    <li>Communication Strategy</li>
-                    <li>Contract Management</li>
-                    <li>Stakeholder Management</li>
-                    <li>Project Governance</li>
-                </ul>
-                <p>The quiz consists of 10 questions. Some questions may have multiple correct answers.</p>
-                <p>Ready to test your knowledge?</p>
-                <button id="start-btn" style="margin-top: 1.5rem;">Start Quiz</button>
-                <button id="admin-login-btn" class="secondary" style="margin-left: 1rem;">Admin Login</button>
+        <section class="hero" id="home">
+            <h2>Welcome !</h2>
+            <p>Find your perfect cuddly companion from our adorable collection of teddy bears!</p>
+            <button class="hero-button">Shop Now!</button>
+        </section>
+        
+        <section class="products" id="products">
+            <h2 class="section-title">Our Cuddly Friends</h2>
+            <div class="product-grid" id="productGrid">
+                <!-- Products will be added here by JavaScript -->
             </div>
-            
-            <!-- Registration Screen -->
-            <div class="registration-screen">
-                <h2>Register to Take the Quiz</h2>
-                <p>Please provide your information to start the quiz:</p>
-                <form id="registration-form">
-                    <div>
-                        <label for="full-name">Full Name:</label>
-                        <input type="text" id="full-name" placeholder="Enter your full name" required>
-                    </div>
-                    <div>
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" placeholder="Enter your email" required>
-                    </div>
-                    <div>
-                        <label for="organization">Organization:</label>
-                        <input type="text" id="organization" placeholder="Enter your organization">
-                    </div>
-                    <div class="nav-buttons" style="justify-content: flex-start;">
-                        <button type="submit">Begin Quiz</button>
-                        <button type="button" class="secondary" id="back-to-welcome" style="margin-left: 1rem;">Back</button>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Quiz Screen -->
-            <div class="quiz-screen">
-                <div class="timer">Time remaining: <span id="time-display">20:00</span></div>
-                <div class="progress-container">
-                    <div class="progress-bar" id="progress-bar"></div>
+        </section>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>About Teddy's Treasures</h3>
+                    <p>We're a family-owned shop dedicated to bringing joy to children through our adorable teddy bears. Each teddy is made with love and care!</p>
                 </div>
-                <div class="question-nav" id="question-nav"></div>
-                <div id="question-container"></div>
-                <div class="nav-buttons">
-                    <button id="prev-btn" class="secondary">Previous</button>
-                    <button id="next-btn">Next</button>
+                <div class="footer-links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#products">Our Teddies</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#contact">Contact Us</a></li>
+                    </ul>
                 </div>
             </div>
-            
-            <!-- Results Screen -->
-            <div class="results-screen">
-                <div class="results-header">
-                    <h2>Quiz Results</h2>
-                    <p>Here's how you performed</p>
-                    <div class="results-score">
-                        <span id="score-value">0</span>/<span id="total-questions">10</span>
-                    </div>
-                </div>
-                
-                <div class="results-container">
-                    <div class="results-summary">
-                        <div class="summary-item">
-                            <div class="summary-value" id="correct-count">0</div>
-                            <div>Correct</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="summary-value" id="incorrect-count">0</div>
-                            <div>Incorrect</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="chart-container">
-                                <canvas id="results-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="question-review">
-                        <h3>Question Review</h3>
-                        <div id="review-container"></div>
-                    </div>
-                    
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <button id="restart-btn">Take Quiz Again</button>
-                    </div>
-                </div>
+            <div class="copyright">
+                <p>&copy; 2025 Teddy's Treasures. All rights reserved.</p>
             </div>
-            
-            <!-- Admin Login Screen -->
-            <div class="admin-screen" id="admin-login-screen">
-                <div class="admin-login">
-                    <h2>Admin Login</h2>
-                    <p>Enter your admin credentials to view quiz results</p>
-                    <form id="admin-form">
-                        <div>
-                            <label for="admin-username">Username:</label>
-                            <input type="text" id="admin-username" placeholder="Enter admin username" required>
-                        </div>
-                        <div>
-                            <label for="admin-password">Password:</label>
-                            <input type="password" id="admin-password" placeholder="Enter password" required>
-                        </div>
-                        <div class="nav-buttons" style="justify-content: flex-start;">
-                            <button type="submit">Login</button>
-                            <button type="button" class="secondary" id="back-to-welcome-from-admin" style="margin-left: 1rem;">Back</button>
-                        </div>
-                    </form>
-                </div>
+        </div>
+    </footer>
+    
+    <div class="cart-icon" id="cartIcon">
+        🛒
+        <span id="cartCount">0</span>
+    </div>
+    
+    <div class="modal" id="cartModal">
+        <div class="modal-content">
+            <button class="close-button" id="closeCart">✖</button>
+            <h2 class="section-title">Your Shopping Cart</h2>
+            <div class="cart-items" id="cartItems">
+                <!-- Cart items will be added here by JavaScript -->
             </div>
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">$0.00</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">Checkout</button>
             
-            <!-- Admin Dashboard Screen -->
-            <div class="admin-screen" id="admin-dashboard">
-                <div class="admin-header">
-                    <h2>Admin Dashboard</h2>
-                    <button class="export-btn" id="export-excel">
-                        Export to Excel
-                    </button>
-                </div>
+            <!-- Contact Information Container (hidden by default) -->
+            <div id="contactContainer" style="display: none;" class="contact-container">
+                <h3 class="contact-title">Contact Us to Complete Your Order</h3>
+                <p>Please contact us with your order details:</p>
+                <div class="contact-number">+1 (555) 123-4567</div>
+                <button class="copy-btn" id="copyContactBtn">Copy Number</button>
+                <p class="copy-message" id="copyMessage" style="display: none;">Number copied to clipboard!</p>
                 
-                <div class="stats-container">
-                    <div class="stat-card">
-                        <h3>Quiz Statistics</h3>
-                        <p>Total Attempts: <strong id="total-attempts">0</strong></p>
-                        <p>Average Score: <strong id="average-score">0%</strong></p>
-                        <p>Highest Score: <strong id="highest-score">0%</strong></p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Most Missed Questions</h3>
-                        <div id="missed-questions"></div>
-                    </div>
+                <div class="cart-summary" id="cartSummary">
+                    <h4 class="summary-title">Your Order Summary</h4>
+                    <!-- Summary will be added here by JavaScript -->
                 </div>
-                
-                <div class="stat-card" style="margin-top: 1rem;">
-                    <h3>Student Results</h3>
-                    <table id="student-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Organization</th>
-                                <th>Score</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody id="student-results">
-                            <!-- Student results will be dynamically added here -->
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="student-details" id="student-details">
-                    <button class="back-btn secondary" id="back-to-students">Back to All Students</button>
-                    <h3>Student Details: <span id="student-name"></span></h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: center;">
-                        <div style="flex: 1; min-width: 300px;">
-                            <p>Email: <strong id="student-email"></strong></p>
-                            <p>Organization: <strong id="student-org"></strong></p>
-                            <p>Score: <strong id="student-score"></strong></p>
-                            <p>Date: <strong id="student-date"></strong></p>
-                        </div>
-                        <div style="flex: 1; min-width: 300px;">
-                            <div class="student-chart">
-                                <canvas id="student-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="question-review" style="margin-top: 2rem;">
-                        <h3>Question Review</h3>
-                        <div id="student-review-container"></div>
-                    </div>
-                </div>
-                
-                <div style="text-align: center; margin-top: 2rem;">
-                    <button class="secondary" id="admin-logout">Logout</button>
-                </div>
+                <button class="copy-btn" id="copySummaryBtn">Copy Order Summary</button>
+                <p class="copy-message" id="copySummaryMessage" style="display: none;">Order summary copied to clipboard!</p>
             </div>
         </div>
     </div>
     
     <script>
-        // Quiz Data
-        const quizData = [
+        // Sample product data
+        const products = [
             {
                 id: 1,
-                question: "A contractor responsible for the structural design has been unable to meet key deadlines due to poor coordination with the electrical team. Both teams are working on overlapping sections of the building, causing delays in installation. Which tool would have helped prevent this coordination issue?",
-                options: [
-                    "Implement an Interface Complexity Assessment Tool (ICAT) to rank and prioritize critical interfaces between the structural and electrical teams.",
-                    "Conduct Monte Carlo Simulation to predict the probability of delays in the coordination between teams.",
-                    "Use Lean Integrated Project Delivery (IPD) to streamline workflows and reduce delays.",
-                    "Develop an Interface Data Register (IDR) to track and manage key coordination milestones."
-                ],
-                correctAnswers: [0],
-                explanation: "The Interface Complexity Assessment Tool (ICAT) is used to identify and prioritize critical interfaces between teams. By ranking these interfaces, the project manager can ensure coordination between teams that have overlapping tasks, avoiding delays."
+                name: "Classic Brown Teddy",
+                price: 19.99,
+                image: "a.webp",
+                description: "A classic brown teddy bear with a red bow tie. Perfect for cuddles!"
             },
             {
                 id: 2,
-                question: "In a large construction project, contractors are responsible for different scopes of work, but a key milestone is missed because one contractor did not provide the necessary input to the other. This issue stems from a lack of tracking for interdependencies between tasks. What interface management tool could have been used to avoid this delay?",
-                options: [
-                    "Responsibility Assignment Matrix (RACI)",
-                    "Interface Data Register (IDR)",
-                    "Earned Value Management (EVM)",
-                    "Critical Path Method (CPM)"
-                ],
-                correctAnswers: [1],
-                explanation: "The IDR tracks dependencies and deliverables between contractors, reducing delays caused by missed handovers."
+                name: "Honey Bear",
+                price: 24.99,
+                image: "sa.jpg",
+                description: "Soft honey-colored bear with embroidered eyes and a sweet smile."
             },
             {
                 id: 3,
-                question: "Your team is struggling with project delays, and scope creep is becoming a common issue. During a meeting, one of your team members suggests implementing a formal communication strategy. Which part of the communication plan would help reduce scope creep?",
-                options: [
-                    "Using technical jargon in all communication",
-                    "Conducting informal communication with stakeholders",
-                    "Including clear documentation and frequent updates about project scope and deliverables",
-                    "Avoiding any direct communication about changes to the project scope"
-                ],
-                correctAnswers: [2],
-                explanation: "Clear documentation and regular updates ensure that everyone is aware of the project scope and helps prevent scope creep."
+                name: "White Chocolate Bear",
+                price: 22.99,
+                image: "av.webp",
+                description: "Adorable pink teddy with sparkly ears and a heart-shaped nose."
             },
             {
                 id: 4,
-                question: "You are managing a multicultural team, and during a meeting, you notice that some members prefer to avoid confrontation while others are direct and challenging in their communication. How can you effectively manage this communication gap to ensure that all team members are heard?",
-                options: [
-                    "Only allow the more assertive members to voice their opinions",
-                    "Adapt your communication style to accommodate both direct and non-confrontational approaches, ensuring all voices are included",
-                    "Continue with the discussion without addressing the differences",
-                    "Avoid involving the non-confrontational members in decision-making discussions"
-                ],
-                correctAnswers: [1],
-                explanation: "Adapting your communication style ensures that all team members, regardless of their cultural background or communication preference, are able to participate and contribute effectively."
+                name: "Weird eyes Bear",
+                price: 26.99,
+                image: "li.webp",
+                description: "Cute panda bear with closed eyes, perfect for bedtime snuggles."
             },
-            {
-                id: 5,
-                question: "You are managing a $500 million infrastructure project, and one of your key challenges is aligning the priorities of multiple stakeholders, including government agencies and private investors. Some stakeholders are frustrated with the slow decision-making process. What governance structure would best address this issue?",
-                options: [
-                    "Allow each stakeholder to make decisions independently",
-                    "Create a project board with clearly defined decision-making authority that includes representatives from all key stakeholder groups",
-                    "Focus decision-making solely on the project manager's discretion",
-                    "Avoid involving stakeholders in decision-making to speed up the process"
-                ],
-                correctAnswers: [1],
-                explanation: "A project board with clearly defined decision-making authority ensures that decisions are made promptly while still including representation from all key stakeholder groups."
-            },
-            {
-                id: 6,
-                question: "A project manager is assigned to lead a large-scale construction project. During a meeting with contractors, a particular supplier found risk-sharing arrangements unfavorable, considering this his walk-away point. In which of the following contract life cycle stages does the described scenario take place?",
-                options: [
-                    "Discovery",
-                    "Pre-award",
-                    "Proposal process",
-                    "Contract management and execution"
-                ],
-                correctAnswers: [0],
-                explanation: "The contract life cycle comprises 5 stages: Discovery, Pre-award, Proposal process, Contract management and execution, and Contract closeout. The described scenario depicts the discovery stage of a contract life cycle. In this stage, the potential contractors define their walk-away point; the maximum threshold of concessions they are willing to make before considering the contract terms unfavorable or unsustainable."
-            },
-            {
-                id: 7,
-                question: "A construction professional is about to subcontract the installation of the building's heating, ventilation, and air conditioning (HVAC) system. During the pre-award phase, the construction professional will look into the payment structure and terms that will be used throughout the life of the contract. When should the construction professional choose a Time & Material contract instead of a lump sum contract?",
-                options: [
-                    "When the goal is to limit cost risks",
-                    "When the scope is barely defined",
-                    "When the work duration is not determined",
-                    "When the scope is precisely defined"
-                ],
-                correctAnswers: [1, 2],
-                explanation: "A Time & Material (T&M) contract is an agreement in which the subcontractor is paid on the basis of the actual labor cost (in agreed hourly or daily rates) in addition to any materials and equipment usage. This contract type is used when there is no firm scope, or the work duration is not determined."
-            },
-            {
-                id: 8,
-                question: "In a built environment project, a construction professional identified 26 Interface Points (IPs). Among these IPs is the installation of windows within the walls. This particular interface requires precise coordination between the general contractor team and the window's contractor team to ensure the windows are aligned with the wall structure and effectively sealed against extreme weather conditions. What type of interface does the scenario describe?",
-                options: [
-                    "Soft & Internal",
-                    "Soft & External",
-                    "Hard & Internal",
-                    "Hard & External"
-                ],
-                correctAnswers: [3],
-                explanation: "The described interface could be categorized as hard & external since it represents a physical connection between two different scopes of work (the wall construction and the windows installation)."
-            },
-            {
-                id: 9,
-                question: "The Master Interface Plan (MIP) outlines the management of Interface Points (IPs) and Interface Agreements (IAs), providing procedures and activities to ensure the efficient delivery of both internal and external IPs throughout the project's life cycle. The MIP typically includes all the following, except:",
-                options: [
-                    "IM spreadsheets and registers",
-                    "IM processes and workflows",
-                    "Definitions of IM, IPs, and IAs",
-                    "Sample IP and IA forms"
-                ],
-                correctAnswers: [0],
-                explanation: "The Master Interface Plan (MIP) doesn't include IM spreadsheets and registers. The spreadsheets and registers are used to manually track agreements and actions, while the MIP is a master document that describes how to manage IM, IPs, and IAs."
-            },
-            {
-                id: 10,
-                question: "A construction professional is leading the construction of a built environment project. During a phone call with a key stakeholder, the latter requested adding some work to the project. The construction professional informed the stakeholder that this would cost an additional $80,000, to which the stakeholder agreed. However, when the construction professional sent the invoice including the additional work fees, the key stakeholder refused to pay the additional cost claiming that the project had an unacceptable delay which could be even penalized. What should the construction professional have done to avoid this situation?",
-                options: [
-                    "Opt for a different communication channel",
-                    "Cut the scope to balance the cost of the additional work",
-                    "Request a lower price for the additional work",
-                    "Request more time to execute the requested work"
-                ],
-                correctAnswers: [0, 3],
-                explanation: "This situation could have been avoided if the construction professional had used formal communication when discussing and approving changes to the contract terms. A phone call is considered informal communication, which means that any decisions made over the phone mainly rely on mutual trust since there is no written record of the discussion or any ensuing decisions. Furthermore, the construction professional had only analyzed the impact of the change on cost and did not thoroughly analyze its impact on scope, time, and resources."
-            }
         ];
-
-        // Variables to track quiz state
-        let currentQuestion = 0;
-        let userAnswers = Array(quizData.length).fill([]);
-        let quizStarted = false;
-        let quizCompleted = false;
-        let userData = {
-            name: "",
-            email: "",
-            organization: "",
-            answers: [],
-            score: 0,
-            date: ""
-        };
-        let timer;
-        let timeLeft = 20 * 60; // 20 minutes in seconds
-
-        // Mock database for student results
-        let studentResults = [];
-
-        // Admin credentials
-        const adminCredentials = {
-            username: "admin",
-            password: "pmp2025"
-        };
-
-        // DOM Elements
-        const welcomeScreen = document.querySelector('.welcome-screen');
-        const registrationScreen = document.querySelector('.registration-screen');
-        const quizScreen = document.querySelector('.quiz-screen');
-        const resultsScreen = document.querySelector('.results-screen');
-        const adminLoginScreen = document.getElementById('admin-login-screen');
-        const adminDashboard = document.getElementById('admin-dashboard');
-        const questionContainer = document.getElementById('question-container');
-        const progressBar = document.getElementById('progress-bar');
-        const questionNav = document.getElementById('question-nav');
-        const timeDisplay = document.getElementById('time-display');
-        const studentDetails = document.getElementById('student-details');
-
-        // Buttons
-        const startBtn = document.getElementById('start-btn');
-        const adminLoginBtn = document.getElementById('admin-login-btn');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const restartBtn = document.getElementById('restart-btn');
-        const backToWelcomeBtn = document.getElementById('back-to-welcome');
-        const backToWelcomeFromAdminBtn = document.getElementById('back-to-welcome-from-admin');
-        const adminLogoutBtn = document.getElementById('admin-logout');
-        const exportExcelBtn = document.getElementById('export-excel');
-        const backToStudentsBtn = document.getElementById('back-to-students');
-
-        // Forms
-        const registrationForm = document.getElementById('registration-form');
-        const adminForm = document.getElementById('admin-form');
-
-        // Event Listeners (continued)
-backToWelcomeFromAdminBtn.addEventListener('click', goBackToWelcome);
-registrationForm.addEventListener('submit', handleRegistration);
-adminForm.addEventListener('submit', handleAdminLogin);
-adminLogoutBtn.addEventListener('click', adminLogout);
-exportExcelBtn.addEventListener('click', exportToExcel);
-backToStudentsBtn.addEventListener('click', showStudentList);
-
-// Functions
-function showRegistration() {
-    welcomeScreen.classList.remove('active');
-    registrationScreen.classList.add('active');
-}
-
-function showAdminLogin() {
-    welcomeScreen.classList.remove('active');
-    adminLoginScreen.classList.add('active');
-}
-
-function goBackToWelcome() {
-    // Hide all screens
-    welcomeScreen.classList.remove('active');
-    registrationScreen.classList.remove('active');
-    quizScreen.classList.remove('active');
-    resultsScreen.classList.remove('active');
-    adminLoginScreen.classList.remove('active');
-    adminDashboard.classList.remove('active');
-    
-    // Show welcome screen
-    welcomeScreen.classList.add('active');
-}
-
-function handleRegistration(e) {
-    e.preventDefault();
-    
-    // Get user data
-    userData = {
-        name: document.getElementById('full-name').value,
-        email: document.getElementById('email').value,
-        organization: document.getElementById('organization').value,
-        answers: Array(quizData.length).fill([]),
-        score: 0,
-        date: new Date().toLocaleString()
-    };
-    
-    // Start quiz
-    startQuiz();
-}
-
-function startQuiz() {
-    // Hide registration screen
-    registrationScreen.classList.remove('active');
-    
-    // Show quiz screen
-    quizScreen.classList.add('active');
-    
-    // Reset quiz state
-    currentQuestion = 0;
-    userAnswers = Array(quizData.length).fill([]);
-    quizStarted = true;
-    quizCompleted = false;
-    
-    // Start timer
-    startTimer();
-    
-    // Initialize question navigation
-    initQuestionNav();
-    
-    // Show first question
-    showQuestion(currentQuestion);
-    
-    // Update progress bar
-    updateProgressBar();
-}
-
-function startTimer() {
-    timeLeft = 20 * 60; // 20 minutes in seconds
-    updateTimerDisplay();
-    
-    timer = setInterval(() => {
-        timeLeft--;
-        updateTimerDisplay();
         
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            finishQuiz();
-        }
-    }, 1000);
-}
-
-function updateTimerDisplay() {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function initQuestionNav() {
-    questionNav.innerHTML = '';
-    
-    for (let i = 0; i < quizData.length; i++) {
-        const navItem = document.createElement('div');
-        navItem.className = 'question-nav-item';
-        navItem.textContent = i + 1;
+        // Shopping cart
+        let cart = [];
         
-        if (i === currentQuestion) {
-            navItem.classList.add('active');
-        }
+        // DOM elements
+        const productGrid = document.getElementById('productGrid');
+        const cartIcon = document.getElementById('cartIcon');
+        const cartModal = document.getElementById('cartModal');
+        const closeCart = document.getElementById('closeCart');
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        const cartCount = document.getElementById('cartCount');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const contactContainer = document.getElementById('contactContainer');
+        const copyContactBtn = document.getElementById('copyContactBtn');
+        const copyMessage = document.getElementById('copyMessage');
+        const cartSummary = document.getElementById('cartSummary');
+        const copySummaryBtn = document.getElementById('copySummaryBtn');
+        const copySummaryMessage = document.getElementById('copySummaryMessage');
         
-        navItem.addEventListener('click', () => {
-            showQuestion(i);
-        });
-        
-        questionNav.appendChild(navItem);
-    }
-}
-
-function updateQuestionNav() {
-    const navItems = questionNav.querySelectorAll('.question-nav-item');
-    
-    navItems.forEach((item, index) => {
-        item.classList.remove('active');
-        
-        if (userAnswers[index].length > 0) {
-            item.classList.add('answered');
-        }
-        
-        if (index === currentQuestion) {
-            item.classList.add('active');
-        }
-    });
-}
-
-function showQuestion(index) {
-    currentQuestion = index;
-    
-    const question = quizData[index];
-    
-    let html = `
-        <div class="question">
-            <div class="question-text">Question ${index + 1}: ${question.question}</div>
-            <div class="options">
-    `;
-    
-    question.options.forEach((option, optIndex) => {
-        const isSelected = userAnswers[index].includes(optIndex);
-        html += `
-            <div class="option ${isSelected ? 'selected' : ''}" data-index="${optIndex}">
-                <div class="option-letter">${String.fromCharCode(65 + optIndex)}</div>
-                <div>${option}</div>
-            </div>
-        `;
-    });
-    
-    html += `
-            </div>
-        </div>
-    `;
-    
-    questionContainer.innerHTML = html;
-    
-    // Add event listeners to options
-    const options = questionContainer.querySelectorAll('.option');
-    options.forEach(option => {
-        option.addEventListener('click', function() {
-            const optionIndex = parseInt(this.dataset.index);
-            toggleAnswer(optionIndex);
-        });
-    });
-    
-    // Update navigation buttons
-    updateNavigationButtons();
-    
-    // Update question navigation
-    updateQuestionNav();
-    
-    // Update progress bar
-    updateProgressBar();
-}
-
-function toggleAnswer(optionIndex) {
-    // Multiple answers can be correct, so we need to allow multiple selections
-    if (userAnswers[currentQuestion].includes(optionIndex)) {
-        userAnswers[currentQuestion] = userAnswers[currentQuestion].filter(i => i !== optionIndex);
-    } else {
-        userAnswers[currentQuestion] = [...userAnswers[currentQuestion], optionIndex];
-    }
-    
-    // Update UI to reflect selection
-    const options = questionContainer.querySelectorAll('.option');
-    options.forEach((option, index) => {
-        if (index === optionIndex) {
-            option.classList.toggle('selected');
-        }
-    });
-    
-    // Update question navigation
-    updateQuestionNav();
-}
-
-function showPreviousQuestion() {
-    if (currentQuestion > 0) {
-        currentQuestion--;
-        showQuestion(currentQuestion);
-    }
-}
-
-function showNextQuestion() {
-    if (currentQuestion < quizData.length - 1) {
-        currentQuestion++;
-        showQuestion(currentQuestion);
-    } else {
-        // Last question, show finish button
-        nextBtn.textContent = 'Finish Quiz';
-    }
-}
-
-function handleNextButton() {
-    if (currentQuestion < quizData.length - 1) {
-        showNextQuestion();
-    } else {
-        finishQuiz();
-    }
-}
-
-function updateNavigationButtons() {
-    prevBtn.disabled = currentQuestion === 0;
-    
-    if (currentQuestion === quizData.length - 1) {
-        nextBtn.textContent = 'Finish Quiz';
-    } else {
-        nextBtn.textContent = 'Next';
-    }
-}
-
-function updateProgressBar() {
-    const progress = ((currentQuestion + 1) / quizData.length) * 100;
-    progressBar.style.width = `${progress}%`;
-}
-
-function finishQuiz() {
-    clearInterval(timer);
-    quizCompleted = true;
-    
-    // Save user data
-    userData.answers = [...userAnswers];
-    userData.score = calculateScore();
-    
-    // Add to student results
-    studentResults.push({...userData});
-    
-    // Save to local storage
-    saveResultsToLocalStorage();
-    
-    // Show results
-    showResults();
-}
-
-function calculateScore() {
-    let score = 0;
-    
-    userAnswers.forEach((answer, index) => {
-        const correctAnswers = quizData[index].correctAnswers;
-        
-        // Check if arrays are equal (same elements in any order)
-        const isCorrect = 
-            answer.length === correctAnswers.length && 
-            correctAnswers.every(value => answer.includes(value)) &&
-            answer.every(value => correctAnswers.includes(value));
-        
-        if (isCorrect) {
-            score++;
-        }
-    });
-    
-    return score;
-}
-
-function showResults() {
-    // Hide quiz screen
-    quizScreen.classList.remove('active');
-    
-    // Show results screen
-    resultsScreen.classList.add('active');
-    
-    // Update score
-    document.getElementById('score-value').textContent = userData.score;
-    document.getElementById('total-questions').textContent = quizData.length;
-    document.getElementById('correct-count').textContent = userData.score;
-    document.getElementById('incorrect-count').textContent = quizData.length - userData.score;
-    
-    // Generate chart
-    generateResultsChart();
-    
-    // Generate review
-    generateReview();
-}
-
-function generateResultsChart() {
-    const ctx = document.getElementById('results-chart').getContext('2d');
-    
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Correct', 'Incorrect'],
-            datasets: [{
-                data: [userData.score, quizData.length - userData.score],
-                backgroundColor: ['#4caf50', '#f44336']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-}
-
-function generateReview() {
-    const reviewContainer = document.getElementById('review-container');
-    reviewContainer.innerHTML = '';
-    
-    quizData.forEach((question, index) => {
-        const userAnswer = userAnswers[index];
-        const correctAnswers = question.correctAnswers;
-        
-        // Check if correct
-        const isCorrect = 
-            userAnswer.length === correctAnswers.length && 
-            correctAnswers.every(value => userAnswer.includes(value)) &&
-            userAnswer.every(value => correctAnswers.includes(value));
-        
-        // Create review item
-        const reviewItem = document.createElement('div');
-        reviewItem.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}`;
-        
-        let html = `
-            <div class="review-header">
-                <div>Question ${index + 1}</div>
-                <div class="review-status ${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? 'Correct' : 'Incorrect'}</div>
-            </div>
-            <div class="question-text">${question.question}</div>
-            <div class="options">
-        `;
-        
-        question.options.forEach((option, optIndex) => {
-            const isUserSelected = userAnswer.includes(optIndex);
-            const isCorrectOption = correctAnswers.includes(optIndex);
+        // Display products
+        function displayProducts() {
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                
+                productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">${product.name}</h3>
+                        <p class="product-price">$${product.price.toFixed(2)}</p>
+                        <button class="product-button" data-id="${product.id}">Add to Cart</button>
+                    </div>
+                `;
+                
+                productGrid.appendChild(productCard);
+            });
             
-            let optionClass = '';
+            // Add event listeners to the Add to Cart buttons
+            document.querySelectorAll('.product-button').forEach(button => {
+                button.addEventListener('click', addToCart);
+            });
+        }
+        
+        // Add to cart function
+        function addToCart(event) {
+            const productId = parseInt(event.target.getAttribute('data-id'));
+            const product = products.find(p => p.id === productId);
             
-            if (isUserSelected && isCorrectOption) {
-                optionClass = 'correct';
-            } else if (isUserSelected && !isCorrectOption) {
-                optionClass = 'incorrect';
-            } else if (!isUserSelected && isCorrectOption) {
-                optionClass = 'missed';
+            const existingCartItem = cart.find(item => item.id === productId);
+            
+            if (existingCartItem) {
+                existingCartItem.quantity += 1;
+            } else {
+                cart.push({
+                    ...product,
+                    quantity: 1
+                });
             }
             
-            html += `
-                <div class="option ${optionClass}">
-                    <div class="option-letter">${String.fromCharCode(65 + optIndex)}</div>
-                    <div>${option}</div>
+            updateCartCount();
+            
+            // Add bounce animation to cart icon
+            cartIcon.style.animation = 'bounce 0.5s';
+            setTimeout(() => {
+                cartIcon.style.animation = '';
+            }, 500);
+        }
+        
+        // Update cart count
+        function updateCartCount() {
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCount.textContent = count;
+        }
+        
+        // Render cart items
+        function renderCartItems() {
+            cartItems.innerHTML = '';
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p style="text-align: center; color: #7e3f8c;">Your cart is empty!</p>';
+                cartTotal.textContent = '$0.00';
+                
+                // Hide contact container if cart is empty
+                contactContainer.style.display = 'none';
+                // Show checkout button
+                checkoutBtn.style.display = 'block';
+                
+                return;
+            }
+            
+            let total = 0;
+            
+            cart.forEach(item => {
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                
+                cartItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+                    <div class="cart-item-details">
+                        <h3 class="cart-item-title">${item.name}</h3>
+                        <p class="cart-item-price">$${item.price.toFixed(2)}</p>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="quantity-btn decrease" data-id="${item.id}">-</button>
+                        <span class="quantity-value">${item.quantity}</span>
+                        <button class="quantity-btn increase" data-id="${item.id}">+</button>
+                    </div>
+                `;
+                
+                cartItems.appendChild(cartItem);
+                
+                total += item.price * item.quantity;
+            });
+            
+            cartTotal.textContent = `$${total.toFixed(2)}`;
+            
+            // Add event listeners to quantity buttons
+            document.querySelectorAll('.quantity-btn.decrease').forEach(button => {
+                button.addEventListener('click', decreaseQuantity);
+            });
+            
+            document.querySelectorAll('.quantity-btn.increase').forEach(button => {
+                button.addEventListener('click', increaseQuantity);
+            });
+        }
+        
+        // Generate order summary HTML
+        function generateOrderSummary() {
+            if (cart.length === 0) {
+                return "<p>Your cart is empty</p>";
+            }
+            
+            let summaryHTML = "";
+            let total = 0;
+            
+            cart.forEach(item => {
+                summaryHTML += `<div class="summary-item">${item.quantity}x ${item.name} - $${(item.price * item.quantity).toFixed(2)}</div>`;
+                total += item.price * item.quantity;
+            });
+            
+            summaryHTML += `<div class="summary-item" style="font-weight: bold; margin-top: 10px;">Total: $${total.toFixed(2)}</div>`;
+            
+            return summaryHTML;
+        }
+        
+        // Generate order summary as text for copying
+        function generateOrderSummaryText() {
+            if (cart.length === 0) {
+                return "Your cart is empty";
+            }
+            
+            let summaryText = "ORDER SUMMARY:\n";
+            let total = 0;
+            
+            cart.forEach(item => {
+                summaryText += `${item.quantity}x ${item.name} - $${(item.price * item.quantity).toFixed(2)}\n`;
+                total += item.price * item.quantity;
+            });
+            
+            summaryText += `\nTotal: $${total.toFixed(2)}`;
+            
+            return summaryText;
+        }
+        
+        // Update cart summary in contact container
+        function updateCartSummary() {
+            cartSummary.innerHTML = generateOrderSummary();
+        }
+        
+        // Decrease quantity
+        function decreaseQuantity(event) {
+            const productId = parseInt(event.target.getAttribute('data-id'));
+            const cartItem = cart.find(item => item.id === productId);
+            
+            if (cartItem.quantity > 1) {
+                cartItem.quantity -= 1;
+            } else {
+                cart = cart.filter(item => item.id !== productId);
+            }
+            
+            updateCartCount();
+            renderCartItems();
+            
+            // Update cart summary if contact container is visible
+            if (contactContainer.style.display !== 'none') {
+                updateCartSummary();
+            }
+        }
+        
+        // Increase quantity
+        function increaseQuantity(event) {
+            const productId = parseInt(event.target.getAttribute('data-id'));
+            const cartItem = cart.find(item => item.id === productId);
+            
+            cartItem.quantity += 1;
+            
+            updateCartCount();
+            renderCartItems();
+            
+            // Update cart summary if contact container is visible
+            if (contactContainer.style.display !== 'none') {
+                updateCartSummary();
+            }
+        }
+        
+        // Checkout function
+        checkoutBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert("Your cart is empty! Add some teddy bears first.");
+                return;
+            }
+            
+            // Hide checkout button
+            checkoutBtn.style.display = 'none';
+            
+            // Update cart summary
+            updateCartSummary();
+            
+            // Show contact information
+            contactContainer.style.display = 'block';
+        });
+        
+        // Show cart modal
+        cartIcon.addEventListener('click', () => {
+            renderCartItems();
+            cartModal.style.display = 'flex';
+        });
+        
+        // Close cart modal
+        closeCart.addEventListener('click', () => {
+            cartModal.style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target === cartModal) {
+                cartModal.style.display = 'none';
+            }
+        });
+        
+        // Copy contact number to clipboard
+        copyContactBtn.addEventListener('click', () => {
+            const contactNumber = '+1 (555) 123-4567';
+            navigator.clipboard.writeText(contactNumber).then(() => {
+                copyMessage.style.display = 'block';
+                setTimeout(() => {
+                    copyMessage.style.display = 'none';
+                }, 2000);
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                alert('Failed to copy contact number. Please copy it manually.');
+            });
+        });
+        
+        // Copy order summary to clipboard
+        copySummaryBtn.addEventListener('click', () => {
+            const summaryText = generateOrderSummaryText();
+            navigator.clipboard.writeText(summaryText).then(() => {
+                copySummaryMessage.style.display = 'block';
+                setTimeout(() => {
+                    copySummaryMessage.style.display = 'none';
+                }, 2000);
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                alert('Failed to copy order summary. Please copy it manually.');
+            });
+        });
+        
+        // Add about section
+        function createAboutSection() {
+            const aboutSection = document.createElement('section');
+            aboutSection.id = 'about';
+            aboutSection.className = 'hero';
+            aboutSection.style.marginTop = '40px';
+            
+            aboutSection.innerHTML = `
+                <h2 class="section-title">About Us</h2>
+                <div style="text-align: left; padding: 20px; background-color: white; border-radius: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                    <p style="margin-bottom: 15px; color: #5e2f6c; font-size: 1.1rem; line-height: 1.6;">
+                        Welcome to Teddy's Treasures, where every teddy bear has a story to tell! We've been creating 
+                        adorable, huggable friends for children of all ages since 2010.
+                    </p>
+                    <p style="margin-bottom: 15px; color: #5e2f6c; font-size: 1.1rem; line-height: 1.6;">
+                        Our teddy bears are crafted with love and care using only the softest, most durable materials. 
+                        Each design is thoughtfully created to bring joy and comfort to your little ones.
+                    </p>
+                    <p style="color: #5e2f6c; font-size: 1.1rem; line-height: 1.6;">
+                        As a family-owned business, we understand the importance of a child's special cuddly companion. 
+                        That's why we stand behind the quality of every teddy bear that leaves our shop!
+                    </p>
                 </div>
             `;
-        });
-        
-        html += `
-            </div>
-            <div class="explanation">${question.explanation}</div>
-        `;
-        
-        reviewItem.innerHTML = html;
-        reviewContainer.appendChild(reviewItem);
-    });
-}
-
-function restartQuiz() {
-    // Hide results screen
-    resultsScreen.classList.remove('active');
-    
-    // Show welcome screen
-    welcomeScreen.classList.add('active');
-}
-
-function handleAdminLogin(e) {
-    e.preventDefault();
-    
-    const username = document.getElementById('admin-username').value;
-    const password = document.getElementById('admin-password').value;
-    
-    if (username === adminCredentials.username && password === adminCredentials.password) {
-        // Load results from local storage
-        loadResultsFromLocalStorage();
-        
-        // Hide admin login screen
-        adminLoginScreen.classList.remove('active');
-        
-        // Show admin dashboard
-        adminDashboard.classList.add('active');
-        
-        // Update dashboard
-        updateAdminDashboard();
-    } else {
-        alert('Invalid credentials. Please try again.');
-    }
-}
-
-function adminLogout() {
-    // Hide admin dashboard
-    adminDashboard.classList.remove('active');
-    
-    // Show welcome screen
-    welcomeScreen.classList.add('active');
-}
-
-function updateAdminDashboard() {
-    // Update stats
-    document.getElementById('total-attempts').textContent = studentResults.length;
-    
-    // Calculate average score
-    const totalScore = studentResults.reduce((sum, student) => sum + student.score, 0);
-    const averageScore = studentResults.length > 0 ? (totalScore / studentResults.length * 10).toFixed(1) : 0;
-    document.getElementById('average-score').textContent = `${averageScore}%`;
-    
-    // Calculate highest score
-    const highestScore = studentResults.length > 0 ? Math.max(...studentResults.map(student => student.score)) * 10 : 0;
-    document.getElementById('highest-score').textContent = `${highestScore}%`;
-    
-    // Calculate most missed questions
-    const missedQuestions = calculateMostMissedQuestions();
-    updateMissedQuestions(missedQuestions);
-    
-    // Update student results table
-    updateStudentTable();
-}
-
-function calculateMostMissedQuestions() {
-    const missedCounts = Array(quizData.length).fill(0);
-    
-    studentResults.forEach(student => {
-        student.answers.forEach((answer, index) => {
-            const correctAnswers = quizData[index].correctAnswers;
             
-            // Check if incorrect
-            const isCorrect = 
-                answer.length === correctAnswers.length && 
-                correctAnswers.every(value => answer.includes(value)) &&
-                answer.every(value => correctAnswers.includes(value));
-            
-            if (!isCorrect) {
-                missedCounts[index]++;
-            }
-        });
-    });
-    
-    // Sort by most missed
-    const sortedIndices = [...Array(quizData.length).keys()]
-        .sort((a, b) => missedCounts[b] - missedCounts[a]);
-    
-    // Return top 3
-    return sortedIndices.slice(0, 3).map(index => ({
-        questionIndex: index,
-        missedCount: missedCounts[index]
-    }));
-}
-
-function updateMissedQuestions(missedQuestions) {
-    const missedContainer = document.getElementById('missed-questions');
-    missedContainer.innerHTML = '';
-    
-    if (studentResults.length === 0) {
-        missedContainer.innerHTML = '<p>No data available yet.</p>';
-        return;
-    }
-    
-    missedQuestions.forEach(item => {
-        const { questionIndex, missedCount } = item;
-        const question = quizData[questionIndex];
-        
-        const percentage = (missedCount / studentResults.length * 100).toFixed(1);
-        
-        const div = document.createElement('div');
-        div.style.margin = '0.8rem 0';
-        div.innerHTML = `
-            <p><strong>Q${questionIndex + 1}:</strong> ${question.question.substring(0, 70)}...</p>
-            <p>Missed by ${missedCount} students (${percentage}%)</p>
-        `;
-        
-        missedContainer.appendChild(div);
-    });
-}
-
-function updateStudentTable() {
-    const tbody = document.getElementById('student-results');
-    tbody.innerHTML = '';
-    
-    studentResults.forEach((student, index) => {
-        const tr = document.createElement('tr');
-        tr.className = 'student-row';
-        tr.dataset.index = index;
-        
-        tr.innerHTML = `
-            <td>${student.name}</td>
-            <td>${student.email}</td>
-            <td>${student.organization || 'N/A'}</td>
-            <td>${student.score} / ${quizData.length}</td>
-            <td>${student.date}</td>
-        `;
-        
-        tr.addEventListener('click', () => {
-            showStudentDetails(index);
-        });
-        
-        tbody.appendChild(tr);
-    });
-}
-
-function showStudentDetails(index) {
-    const student = studentResults[index];
-    
-    // Hide student list
-    document.getElementById('student-table').style.display = 'none';
-    
-    // Show student details
-    studentDetails.style.display = 'block';
-    
-    // Update student info
-    document.getElementById('student-name').textContent = student.name;
-    document.getElementById('student-email').textContent = student.email;
-    document.getElementById('student-org').textContent = student.organization || 'N/A';
-    document.getElementById('student-score').textContent = `${student.score} / ${quizData.length}`;
-    document.getElementById('student-date').textContent = student.date;
-    
-    // Generate chart
-    generateStudentChart(student);
-    
-    // Generate review
-    generateStudentReview(student);
-}
-
-function showStudentList() {
-    // Show student list
-    document.getElementById('student-table').style.display = 'table';
-    
-    // Hide student details
-    studentDetails.style.display = 'none';
-}
-
-function generateStudentChart(student) {
-    const ctx = document.getElementById('student-chart').getContext('2d');
-    
-    // Destroy existing chart if it exists
-    if (window.studentChart) {
-        window.studentChart.destroy();
-    }
-    
-    window.studentChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Correct', 'Incorrect'],
-            datasets: [{
-                data: [student.score, quizData.length - student.score],
-                backgroundColor: ['#4caf50', '#f44336']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
+            const container = document.querySelector('.container');
+            const footer = document.querySelector('footer');
+            container.insertBefore(aboutSection, footer);
         }
-    });
-}
-
-function generateStudentReview(student) {
-    const reviewContainer = document.getElementById('student-review-container');
-    reviewContainer.innerHTML = '';
-    
-    quizData.forEach((question, index) => {
-        const userAnswer = student.answers[index];
-        const correctAnswers = question.correctAnswers;
         
-        // Check if correct
-        const isCorrect = 
-            userAnswer.length === correctAnswers.length && 
-            correctAnswers.every(value => userAnswer.includes(value)) &&
-            userAnswer.every(value => correctAnswers.includes(value));
-        
-        // Create review item
-        const reviewItem = document.createElement('div');
-        reviewItem.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}`;
-        
-        let html = `
-            <div class="review-header">
-                <div>Question ${index + 1}</div>
-                <div class="review-status ${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? 'Correct' : 'Incorrect'}</div>
-            </div>
-            <div class="question-text">${question.question}</div>
-            <div class="options">
-        `;
-        
-        question.options.forEach((option, optIndex) => {
-            const isUserSelected = userAnswer.includes(optIndex);
-            const isCorrectOption = correctAnswers.includes(optIndex);
+        // Add contact section
+        function createContactSection() {
+            const contactSection = document.createElement('section');
+            contactSection.id = 'contact';
+            contactSection.className = 'hero';
+            contactSection.style.marginTop = '40px';
             
-            let optionClass = '';
-            
-            if (isUserSelected && isCorrectOption) {
-                optionClass = 'correct';
-            } else if (isUserSelected && !isCorrectOption) {
-                optionClass = 'incorrect';
-            } else if (!isUserSelected && isCorrectOption) {
-                optionClass = 'missed';
-            }
-            
-            html += `
-                <div class="option ${optionClass}">
-                    <div class="option-letter">${String.fromCharCode(65 + optIndex)}</div>
-                    <div>${option}</div>
+            contactSection.innerHTML = `
+                <h2 class="section-title">Contact Us</h2>
+                <div style="text-align: left; padding: 20px; background-color: white; border-radius: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                    <p style="margin-bottom: 20px; color: #5e2f6c; font-size: 1.1rem; text-align: center;">
+                        We'd love to hear from you! Reach out with any questions about our teddy bears.
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; justify-content: space-around; margin-top: 20px;">
+                        <div style="margin-bottom: 20px; text-align: center; padding: 15px; background-color: #ffd1dc; border-radius: 15px; min-width: 250px;">
+                            <h3 style="color: #7e3f8c; margin-bottom: 10px;">Phone</h3>
+                            <p style="color: #5e2f6c; font-size: 1.1rem;">+1 (555) 123-4567</p>
+                        </div>
+                        <div style="margin-bottom: 20px; text-align: center; padding: 15px; background-color: #ffd1dc; border-radius: 15px; min-width: 250px;">
+                            <h3 style="color: #7e3f8c; margin-bottom: 10px;">Email</h3>
+                            <p style="color: #5e2f6c; font-size: 1.1rem;">hello@teddystreasures.com</p>
+                        </div>
+                    </div>
+                    <div style="margin-top: 30px; text-align: center;">
+                        <h3 style="color: #7e3f8c; margin-bottom: 15px;">Send Us a Message</h3>
+                        <form id="contactForm" style="max-width: 500px; margin: 0 auto;">
+                            <div style="margin-bottom: 15px;">
+                                <input type="text" placeholder="Your Name" required style="width: 100%; padding: 12px; border: 2px solid #ffd1dc; border-radius: 50px; font-size: 1rem; color: #5e2f6c;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <input type="email" placeholder="Your Email" required style="width: 100%; padding: 12px; border: 2px solid #ffd1dc; border-radius: 50px; font-size: 1rem; color: #5e2f6c;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <textarea placeholder="Your Message" required style="width: 100%; height: 150px; padding: 12px; border: 2px solid #ffd1dc; border-radius: 20px; font-size: 1rem; color: #5e2f6c; resize: vertical;"></textarea>
+                            </div>
+                            <button type="submit" class="hero-button" style="width: 100%;">Send Message</button>
+                        </form>
+                    </div>
                 </div>
             `;
-        });
+            
+            const container = document.querySelector('.container');
+            const footer = document.querySelector('footer');
+            container.insertBefore(contactSection, footer);
+            
+            // Add event listener to the contact form
+            const contactForm = document.getElementById('contactForm');
+            contactForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                alert('Thank you for your message! We will get back to you soon.');
+                contactForm.reset();
+            });
+        }
         
-        html += `
-            </div>
-            <div class="explanation">${question.explanation}</div>
-        `;
+        // Initialize page
+        function initPage() {
+            displayProducts();
+            createAboutSection();
+            createContactSection();
+            
+            // Add smooth scrolling for navigation links
+            document.querySelectorAll('nav a, .footer-links a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Add click event to the hero button
+            document.querySelector('.hero-button').addEventListener('click', function() {
+                window.scrollTo({
+                    top: document.getElementById('products').offsetTop - 100,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Fix missing image placeholders
+            document.querySelectorAll('.product-image').forEach(img => {
+                img.addEventListener('error', function() {
+                    this.src = 'https://via.placeholder.com/300x200?text=Teddy+Bear';
+                });
+                
+                // Trigger error event for images with invalid sources
+                if (!img.complete || img.naturalHeight === 0) {
+                    img.src = 'https://via.placeholder.com/300x200?text=Teddy+Bear';
+                }
+            });
+        }
         
-        reviewItem.innerHTML = html;
-        reviewContainer.appendChild(reviewItem);
-    });
-}
-
-function exportToExcel() {
-    // Create workbook
-    const wb = XLSX.utils.book_new();
-    
-    // Create data array
-    const data = [
-        ['Name', 'Email', 'Organization', 'Score', 'Date']
-    ];
-    
-    // Add student data
-    studentResults.forEach(student => {
-        data.push([
-            student.name,
-            student.email,
-            student.organization || 'N/A',
-            `${student.score} / ${quizData.length}`,
-            student.date
-        ]);
-    });
-    
-    // Create worksheet
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    
-    // Add worksheet to workbook
-    XLSX.utils.book_append_sheet(wb, ws, 'Quiz Results');
-    
-    // Save file
-    XLSX.writeFile(wb, 'pmp_quiz_results.xlsx');
-}
-
-function saveResultsToLocalStorage() {
-    localStorage.setItem('pmpQuizResults', JSON.stringify(studentResults));
-}
-
-function loadResultsFromLocalStorage() {
-    const results = localStorage.getItem('pmpQuizResults');
-    
-    if (results) {
-        studentResults = JSON.parse(results);
-    }
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    loadResultsFromLocalStorage();
-});
-
-// Fix for the Next button event handler
-function handleNextButton() {
-    if (currentQuestion < quizData.length - 1) {
-        showNextQuestion();
-    } else {
-        finishQuiz();
-    }
-}
-
-// Fix for the Previous button event handler
-function showPreviousQuestion() {
-    if (currentQuestion > 0) {
-        currentQuestion--;
-        showQuestion(currentQuestion);
-    }
-}
-
-// Fix for showing the next question
-function showNextQuestion() {
-    if (currentQuestion < quizData.length - 1) {
-        currentQuestion++;
-        showQuestion(currentQuestion);
-    } else {
-        // Last question, show finish button
-        nextBtn.textContent = 'Finish Quiz';
-    }
-}
-
-// Make sure these event listeners are properly attached
-document.addEventListener('DOMContentLoaded', function() {
-    // Add these lines to your existing DOMContentLoaded event listener
-    prevBtn.addEventListener('click', showPreviousQuestion);
-    nextBtn.addEventListener('click', handleNextButton);
-});
-// Fix for the Start Quiz button event handler
-function showRegistration() {
-    welcomeScreen.classList.remove('active');
-    registrationScreen.classList.add('active');
-}
-
-// Fix for the Admin Login button event handler
-function showAdminLogin() {
-    welcomeScreen.classList.remove('active');
-    adminLoginScreen.classList.add('active');
-}
-
-// Fix for the registration form submission
-function handleRegistration(e) {
-    e.preventDefault();
-    
-    // Get user data
-    userData = {
-        name: document.getElementById('full-name').value,
-        email: document.getElementById('email').value,
-        organization: document.getElementById('organization').value,
-        answers: Array(quizData.length).fill([]),
-        score: 0,
-        date: new Date().toLocaleString()
-    };
-    
-    // Start quiz
-    startQuiz();
-}
-
-// Fix for admin login form submission
-function handleAdminLogin(e) {
-    e.preventDefault();
-    
-    const username = document.getElementById('admin-username').value;
-    const password = document.getElementById('admin-password').value;
-    
-    if (username === adminCredentials.username && password === adminCredentials.password) {
-        // Load results from local storage
-        loadResultsFromLocalStorage();
-        
-        // Hide admin login screen
-        adminLoginScreen.classList.remove('active');
-        
-        // Show admin dashboard
-        adminDashboard.classList.add('active');
-        
-        // Update dashboard
-        updateAdminDashboard();
-    } else {
-        alert('Invalid credentials. Please try again.');
-    }
-}
-
-// Make sure these event listeners are properly attached
-document.addEventListener('DOMContentLoaded', function() {
-    // Reattach the event listeners to ensure they work
-    startBtn.addEventListener('click', showRegistration);
-    adminLoginBtn.addEventListener('click', showAdminLogin);
-    registrationForm.addEventListener('submit', handleRegistration);
-    adminForm.addEventListener('submit', handleAdminLogin);
-});
-
-</script>
+        // Run initialization when DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>
